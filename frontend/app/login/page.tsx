@@ -2,55 +2,105 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // API Call logic will go here
-    router.push('/dashboard');
+    setIsLoading(true);
+    // Simulate API delay
+    setTimeout(() => {
+      router.push('/dashboard');
+    }, 800);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-950 p-6">
-      <div className="w-full max-w-md p-8 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-xl space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-zinc-100">Welcome back</h1>
-          <p className="text-zinc-400 text-sm">Enter your credentials to access your LifeMap.</p>
-        </div>
+    <div className="absolute inset-0 flex items-center justify-center px-4 overflow-hidden">
+      {/* Subtle Background Elements */}
+      <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] -z-10" />
+      <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 w-[600px] h-[600px] bg-indigo-900/10 rounded-full blur-[120px] -z-10" />
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-zinc-300">Email / Username</label>
-            <input 
-              type="text"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 bg-zinc-950 border border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-zinc-100"
-              required 
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-zinc-300">Password</label>
-            <input 
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-zinc-950 border border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-zinc-100"
-              required 
-            />
-          </div>
-          <button 
-            type="submit"
-            className="w-full py-2.5 mt-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
-          >
-            Sign In
-          </button>
-        </form>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-md"
+      >
+        <Card className="border-border/50 shadow-2xl shadow-black/40 backdrop-blur-xl bg-card/95">
+          <CardHeader className="space-y-3 pb-6 text-center">
+            <div className="mx-auto w-12 h-12 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center shadow-inner mb-2">
+              <span className="text-primary font-bold text-xl">L</span>
+            </div>
+            <CardTitle className="text-2xl font-bold tracking-tight">Welcome back</CardTitle>
+            <CardDescription className="text-base text-muted-foreground">
+              Sign in to continue your trajectory.
+            </CardDescription>
+          </CardHeader>
+          
+          <form onSubmit={handleLogin}>
+            <CardContent className="space-y-5">
+              <div className="space-y-2.5">
+                <label className="text-sm font-medium text-foreground ml-1">Account</label>
+                <Input 
+                  type="text"
+                  placeholder="Email or Username"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required 
+                  disabled={isLoading}
+                  className="h-12 text-base"
+                />
+              </div>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between ml-1 mr-1">
+                  <label className="text-sm font-medium text-foreground">Password</label>
+                  <a href="#" className="text-sm text-primary hover:underline hover:text-primary/80 transition-colors">
+                    Forgot?
+                  </a>
+                </div>
+                <Input 
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required 
+                  disabled={isLoading}
+                  className="h-12 text-base"
+                />
+              </div>
+            </CardContent>
+            <CardFooter className="pt-2 pb-8">
+              <Button 
+                type="submit"
+                size="lg"
+                disabled={isLoading}
+                className="w-full h-12 text-base font-semibold shadow-lg shadow-primary/20"
+              >
+                {isLoading ? (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex justify-center items-center gap-2"
+                  >
+                    <div className="w-4 h-4 rounded-full border-2 border-primary-foreground border-r-transparent animate-spin" />
+                    Connecting...
+                  </motion.div>
+                ) : (
+                  "Initiate Session"
+                )}
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
+      </motion.div>
     </div>
   );
 }
