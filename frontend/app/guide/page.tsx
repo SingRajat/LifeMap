@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Target, Activity, CalendarDays } from 'lucide-react';
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -15,9 +15,9 @@ const containerVariants = {
   }
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as any } }
 };
 
 export default function GuidePage() {
@@ -78,10 +78,8 @@ export default function GuidePage() {
         </motion.div>
 
         <motion.div variants={itemVariants} className="flex justify-center pt-8">
-          <Button asChild size="lg" className="rounded-xl px-12 h-14 text-base font-semibold shadow-xl shadow-primary/20 group">
-            <Link href="/login">
-              Acknowledge & Begin
-            </Link>
+          <Button onClick={() => window.location.href = '/login'} size="lg" className="rounded-xl px-12 h-14 text-base font-semibold shadow-xl shadow-primary/20 group">
+            Acknowledge & Begin
           </Button>
         </motion.div>
       </motion.div>
