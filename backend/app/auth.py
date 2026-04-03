@@ -16,14 +16,22 @@ SECRET_KEY = os.getenv("SECRET_KEY", "your-super-secret-key-change-this-in-produ
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 7 days
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from fastapi.security import OAuth2PasswordBearer
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
+import bcrypt
+
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    if not isinstance(plain_password, bytes):
+        plain_password = plain_password.encode('utf-8')
+    if not isinstance(hashed_password, bytes):
+        hashed_password = hashed_password.encode('utf-8')
+    return bcrypt.checkpw(plain_password, hashed_password)
 
 def get_password_hash(password):
-    return pwd_context.hash(password)
+    if not isinstance(password, bytes):
+        password = password.encode('utf-8')
+    return bcrypt.hashpw(password, bcrypt.gensalt()).decode('utf-8')
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
