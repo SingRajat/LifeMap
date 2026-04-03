@@ -1,0 +1,51 @@
+# --- [ Root .gitignore ] ---
+
+# Next.js / Node
+node_modules/
+.next/
+out/
+build/
+.vercel
+*.log
+.pnp
+.pnp.js
+
+# Python / FastAPI
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+life-env/
+instance/
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Environment & Secrets (CRITICAL)
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.key
+*.pem
+credentials.json
+client_secret.json
+
+# Databases
+*.db
+*.sqlite3
+lifemap.db
+sql_app.db
+
+# IDEs & OS
+.vscode/
+.idea/
+*.swp
+*.bak
+.DS_Store
+Thumbs.db
