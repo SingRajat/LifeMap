@@ -6,7 +6,7 @@ interface MissionsState {
   isLoading: boolean;
   error: string | null;
   fetchTodaysMissions: () => Promise<void>;
-  completeMission: (id: string) => Promise<void>;
+  toggleMission: (id: string) => Promise<void>;
 }
 
 export const useMissionsStore = create<MissionsState>((set, get) => ({
@@ -24,16 +24,25 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
     }
   },
   
-  completeMission: async (id: string) => {
+  toggleMission: async (id: string) => {
+    const previousMissions = get().todaysMissions;
+    const mission = previousMissions.find(m => m.id === id);
+    if (!mission) return;
+    
+    const newStatus = mission.status === 'completed' ? 'pending' : 'completed';
+    
+    // Optimistic Update
+    set({
+      todaysMissions: previousMissions.map((m) => 
+        m.id === id ? { ...m, status: newStatus } : m
+      )
+    });
+
     try {
-      await missionsApi.updateStatus(id, 'completed');
-      set({
-        todaysMissions: get().todaysMissions.map((m) => 
-          m.id === id ? { ...m, status: 'completed' } : m
-        )
-      });
+      await missionsApi.updateStatus(id, newStatus);
     } catch (error: any) {
-      set({ error: error.message });
+      // Rollback on failure
+      set({ todaysMissions: previousMissions, error: error.message });
     }
   }
 }));

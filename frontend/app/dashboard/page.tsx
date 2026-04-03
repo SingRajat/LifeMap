@@ -1,26 +1,12 @@
 'use client';
 
+import { useEffect } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { CheckSquare, Target, Clock, ArrowRight } from 'lucide-react';
-
-// Fake data for UI structure
-const mockMissions = [
-  { id: 1, text: "Complete architecture review", done: true },
-  { id: 2, text: "Workout (45 mins)", done: false },
-  { id: 3, text: "Read 20 pages of Deep Work", done: false },
-];
-
-const mockGoals = [
-  { id: 1, name: "Launch Startup", progress: 65, color: "bg-primary" },
-  { id: 2, name: "Marathon Prep", progress: 30, color: "bg-emerald-500" },
-];
-
-const mockTime = [
-  { category: "Deep Work", hours: 4.5, percent: 45 },
-  { category: "Learning", hours: 2, percent: 20 },
-  { category: "Health", hours: 1.5, percent: 15 },
-];
+import { useDashboardStore } from '@/store/dashboard';
+import { useMissionsStore } from '@/store/missions';
+import { useGoalsStore } from '@/store/goals';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -36,6 +22,20 @@ const itemVariants: Variants = {
 };
 
 export default function DashboardPage() {
+  const { stats, fetchStats } = useDashboardStore();
+  const { todaysMissions, fetchTodaysMissions } = useMissionsStore();
+  const { goals, fetchGoals } = useGoalsStore();
+
+  useEffect(() => {
+    fetchStats();
+    fetchTodaysMissions();
+    fetchGoals();
+  }, [fetchStats, fetchTodaysMissions, fetchGoals]);
+
+  const activeMissions = todaysMissions.slice(0, 5); // display up to 5 top missions
+  const timeEntries = stats?.time_distribution 
+    ? Object.entries(stats.time_distribution).map(([category, hours]) => ({ category, hours }))
+    : [];
   return (
     <div className="w-full max-w-6xl mx-auto p-4 sm:p-6 md:p-8">
       <motion.div
@@ -61,23 +61,29 @@ export default function DashboardPage() {
                   </span>
                   Today's Missions
                 </CardTitle>
-                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300" />
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300" />
               </CardHeader>
               <CardContent className="pt-4 space-y-3">
-                {mockMissions.map((mission) => (
-                  <div key={mission.id} className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-white/5 transition-colors">
-                    <div className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-colors ${
-                      mission.done 
-                        ? 'bg-primary border-primary text-primary-foreground' 
-                        : 'border-border bg-background'
-                    }`}>
-                      {mission.done && <CheckSquare className="w-3.5 h-3.5" />}
+                {activeMissions.map((mission: any) => {
+                  const isDone = mission.status === 'completed';
+                  return (
+                    <div key={mission.id} className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-white/2 transition-colors">
+                      <div className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+                        isDone 
+                          ? 'bg-primary border-primary text-primary-foreground' 
+                          : 'border-border bg-background'
+                      }`}>
+                        {isDone && <CheckSquare className="w-3.5 h-3.5" />}
+                      </div>
+                      <span className={`text-sm ${isDone ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
+                        {mission.title}
+                      </span>
                     </div>
-                    <span className={`text-sm ${mission.done ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
-                      {mission.text}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
+                {activeMissions.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No active missions for today.</p>
+                )}
               </CardContent>
             </Card>
           </motion.div>
@@ -92,25 +98,33 @@ export default function DashboardPage() {
                   </span>
                   Goal Progress
                 </CardTitle>
-                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-emerald-500 transition-colors opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300" />
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-emerald-500 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300" />
               </CardHeader>
               <CardContent className="pt-4 space-y-5">
-                {mockGoals.map((goal) => (
-                  <div key={goal.id} className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="font-medium text-foreground">{goal.name}</span>
-                      <span className="text-muted-foreground">{goal.progress}%</span>
+                {goals.slice(0, 3).map((goal: any, i: number) => {
+                  const progress = 0; // Default until actual progress is calculated from DB
+                  const colors = ["bg-primary", "bg-emerald-500", "bg-blue-500"];
+                  const color = colors[i % colors.length];
+                  return (
+                    <div key={goal.id} className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="font-medium text-foreground">{goal.title}</span>
+                        <span className="text-muted-foreground">{progress}%</span>
+                      </div>
+                      <div className="h-2 w-full bg-background rounded-full overflow-hidden border border-border/50">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${progress}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                          className={`h-full ${color}`}
+                        />
+                      </div>
                     </div>
-                    <div className="h-2 w-full bg-background rounded-full overflow-hidden border border-border/50">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${goal.progress}%` }}
-                        transition={{ duration: 1, ease: "easeOut" }}
-                        className={`h-full ${goal.color}`}
-                      />
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
+                {goals.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No goals active.</p>
+                )}
               </CardContent>
             </Card>
           </motion.div>
@@ -125,11 +139,11 @@ export default function DashboardPage() {
                   </span>
                   Time Investment
                 </CardTitle>
-                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-blue-500 transition-colors opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300" />
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-blue-500 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300" />
               </CardHeader>
               <CardContent className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  {mockTime.map((time) => (
+                  {timeEntries.map((time: any) => (
                     <div key={time.category} className="flex flex-col gap-1 p-4 rounded-xl bg-background/50 border border-border/50">
                       <span className="text-sm text-muted-foreground">{time.category}</span>
                       <div className="flex items-baseline gap-2">
@@ -138,6 +152,9 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   ))}
+                  {timeEntries.length === 0 && (
+                    <p className="text-sm text-muted-foreground col-span-3">No time logs available.</p>
+                  )}
                 </div>
               </CardContent>
             </Card>

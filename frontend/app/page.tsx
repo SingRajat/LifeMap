@@ -6,13 +6,27 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function QuoteScreen() {
   const router = useRouter();
-  const [quote] = useState({
+  const [quote, setQuote] = useState({
     text: "The future belongs to those who believe in the beauty of their dreams.",
     author: "Eleanor Roosevelt"
   });
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
+    // Attempt to fetch quote from backend silently, fallback visually if it fails
+    const fetchQuote = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/quotes/daily');
+        if (res.ok) {
+          const data = await res.json();
+          setQuote({ text: data.text, author: data.author });
+        }
+      } catch (e) {
+        // Fallback to static quote if backend endpoint doesn't exist
+      }
+    };
+    fetchQuote();
+
     // Start exit animation after 2.5s, route slightly after
     const exitTimer = setTimeout(() => setIsVisible(false), 2500);
     const routeTimer = setTimeout(() => router.push('/guide'), 3000);

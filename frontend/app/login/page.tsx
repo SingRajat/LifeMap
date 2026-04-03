@@ -6,20 +6,34 @@ import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { authApi } from '@/lib/api/auth';
+import { useAuthStore } from '@/store/auth';
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [errorObj, setErrorObj] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const setAuth = useAuthStore(state => state.setAuth);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API delay
-    setTimeout(() => {
+    setErrorObj(null);
+    
+    try {
+      // Backend expects username/password for OAuth2 form boundary
+      const data = await authApi.login(email, password);
+      // Persist auth inside Zustand (which replicates to localStorage via persist middleware)
+      setAuth(data.access_token, { username: email, email, id: '1' });
       router.push('/dashboard');
-    }, 800);
+    } catch (err: any) {
+      console.error(err);
+      setErrorObj(err.response?.data?.detail || "Failed to authenticate.");
+      setIsLoading(false);
+    }
   };
 
   return (

@@ -26,7 +26,7 @@ export default function GuidePage() {
       {/* Background ambient glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px] -z-10 opacity-50" />
 
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -37,7 +37,7 @@ export default function GuidePage() {
             <Target className="w-8 h-8" />
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground">
-            Master your life's <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-400">trajectory.</span>
+            Master your life's <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-indigo-400">trajectory.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Direct your energy with precision. LifeMap breaks down your ultimate objectives into actionable daily missions.
